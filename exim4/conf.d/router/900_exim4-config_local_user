@@ -1,0 +1,22 @@
+vmail_user:
+  debug_print = "R: local_user for $local_part@$domain"
+  driver = accept
+  domains = +local_domains
+  local_parts = lsearch;/vmail/config/$domain/users
+  local_part_suffix = +*
+  local_part_suffix_optional
+  headers_remove = Subject
+  headers_add = ${if eq{$h_X-Spam-Flag:}{Yes} {Subject: **SPAM** $h_Subject:} {Subject: $h_Subject:}}
+  transport = dovecot_lmtp
+  cannot_route_message = Unknown user
+
+vmail_alias:
+  driver = redirect
+  allow_defer
+  allow_fail
+  domains = +local_domains
+  data = ${expand:${lookup{$local_part}lsearch*@{/vmail/config/$domain/aliases}}}
+  retry_use_local_part
+  pipe_transport   = address_pipe
+  file_transport   = address_file
+  no_more

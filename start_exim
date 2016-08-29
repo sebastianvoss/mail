@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo $MAILNAME > /etc/mailname
+
+/usr/sbin/exim4 -bdf -q30m

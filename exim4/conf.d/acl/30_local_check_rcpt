@@ -1,0 +1,31 @@
+warn log_message = remote host presented unverifiable HELO/EHLO greeting \
+                   ($sender_helo_name).                                     
+     !verify = helo
+     set acl_m_spamscore = ${eval:$acl_m_spamscore+1}
+     add_header = X-HELO-Warning: Remote host $sender_host_address \                                         
+                  ${if def:sender_host_name {($sender_host_name) }}\                                         
+                  incorrectly presented itself as $sender_helo_name      
+
+# reverse dns failure
+warn condition = ${if and{{def:sender_host_address}{!def:sender_host_name}} {yes}{no}}
+     set acl_m_spamscore = ${eval:$acl_m_spamscore+1}
+
+# HELO is IP address
+warn condition = ${if isip{$sender_helo_name}}
+     logwrite = Invalid HELO name (See RFC2821 4.1.3)
+     set acl_m_spamscore = ${eval:$acl_m_spamscore+1}
+
+# blacklisted
+warn dnslists = CHECK_RCPT_IP_DNSBLS
+     set acl_m_spamscore = ${eval:$acl_m_spamscore+1}
+
+# delay if spamscore >= 1
+warn condition = ${if >={$acl_m_spamscore}{1} {yes}{no}}
+     add_header = X-Spamscore: $acl_m_spamscore
+     logwrite = Delaying $sender_host_address for 45s
+     delay = 45s
+
+# drop if spamscore >= 2 (out of 4)
+#drop message = Message was classified as spam
+#     condition = ${if >={$acl_m_spamscore}{2} {yes}{no}}
+#     delay = 45s

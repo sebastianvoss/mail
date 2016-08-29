@@ -1,0 +1,24 @@
+#MAIN_HARDCODE_PRIMARY_HOSTNAME =
+MAIN_TLS_ENABLE = yes
+MAIN_TLS_CERTIFICATE = /vmail/certs/fullchain.pem
+MAIN_TLS_PRIVATEKEY = /vmail/certs/privkey.pem
+
+MAIN_LOCAL_DOMAINS = dsearch;/vmail/config
+CHECK_RCPT_REVERSE_DNS = yes
+CHECK_RCPT_SPF = yes
+CHECK_MAIL_HELO_ISSUED = yes
+
+CHECK_RCPT_IP_DNSBLS = zen.spamhaus.org
+
+DKIM_CANON = relaxed
+DKIM_DOMAIN = ${sender_address_domain}
+DKIM_FILE = ${lookup{dkim_key}lsearch{/vmail/config/${sender_address_domain}/config}}
+DKIM_SELECTOR = ${lookup{dkim_selector}lsearch{/vmail/config/${sender_address_domain}/config}}
+DKIM_PRIVATE_KEY = ${if exists{DKIM_FILE}{DKIM_FILE}{0}}
+
+CHECK_RCPT_LOCAL_ACL_FILE = CONFDIR/conf.d/acl/30_local_check_rcpt
+
+daemon_smtp_ports = 25 : 465 : 587
+tls_on_connect_ports = 465
+tls_require_ciphers = SECURE128
+smtp_banner = $smtp_active_hostname ESMTP Exim $tod_full

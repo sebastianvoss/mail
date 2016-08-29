@@ -1,0 +1,14 @@
+# Authentication for passwd-file users. Included from 10-auth.conf.
+#
+# passwd-like file with specified location.
+# <doc/wiki/AuthDatabase.PasswdFile.txt>
+
+passdb {
+  driver = passwd-file
+  args = scheme=CRYPT username_format=%n /vmail/config/%d/users
+}
+
+userdb {
+  driver = static
+  args = uid=vmail gid=vmail home=/vmail/config/%d/%n
+}

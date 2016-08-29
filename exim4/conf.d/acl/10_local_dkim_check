@@ -1,0 +1,15 @@
+acl_check_dkim:
+
+  #deny    dkim_status = fail:invalid
+  #        logwrite    = DKIM $dkim_verify_status: $dkim_verify_reason \
+  #                      (address=$sender_address domain=$dkim_cur_signer)
+  #        message     = DKIM $dkim_verify_status: $dkim_verify_reason \
+  #                      (address=$sender_address domain=$dkim_cur_signer)
+
+  warn    dkim_status = *
+          set acl_m_authresults = $acl_m_authresults;\n\t\
+                                  dkim=$dkim_verify_status \
+                                  header.${if eq{$dkim_identity}{}{d}{i}}=$dkim_cur_signer
+
+  # And anything else.
+  accept

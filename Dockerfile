@@ -1,6 +1,5 @@
-MAINTAINER Sebastian Voss
-
 FROM debian:jessie
+MAINTAINER Sebastian Voss
 
 RUN apt-get update && apt-get install -y \
       exim4-daemon-heavy \

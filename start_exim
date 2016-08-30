@@ -1,5 +1,6 @@
 #!/bin/bash
 
 echo $MAILNAME > /etc/mailname
+update-exim4.conf
 
 /usr/sbin/exim4 -bdf -q30m

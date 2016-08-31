@@ -60,8 +60,15 @@ RUN sed -i -r 's/(loadplugin Mail::SpamAssassin::Plugin::DKIM)/#\1/' /etc/spamas
 RUN useradd -u 3000 vmail && \
   usermod -a -G Debian-exim clamav
 
-# init clamav database
+
+# ClamAV
+
+# init signature database
 RUN freshclam
+
+# create folder for socket
+RUN mkdir /var/run/clamav && \
+  chown clamav /var/run/clamav
 
 COPY start_exim /etc/exim4/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf

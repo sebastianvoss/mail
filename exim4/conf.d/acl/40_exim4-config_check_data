@@ -55,6 +55,8 @@ acl_check_data:
   # See the exim docs and the exim wiki for more suitable examples.
   #
   deny
+    #decode = default
+    demime = zip
     malware = *
     message = This message was detected as possible malware ($malware_name).
 

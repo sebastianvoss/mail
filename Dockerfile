@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y \
       dovecot-imapd \
       dovecot-lmtpd \
       spamassassin \
-      clamav-daemon \
       supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Exim configuration files
-COPY exim4/ /etc/exim4/
+COPY exim4/ /etc/exim4/ 
+COPY checkzip /usr/local/bin/
 
 # modify /etc/exim4/update-exim4.conf.conf
 RUN sed -i -r \
@@ -24,7 +24,7 @@ RUN sed -i -r \
 
 RUN sed -i -r \
     -e 's/# (spamd_address) =.*/\1 = 127.0.0.1 783/' \
-    -e 's|# (av_scanner) =.*|\1 = clamd:/var/run/clamav/clamd.ctl|' \
+    -e "s|# (av_scanner) =.*|\1 = cmdline:/usr/local/bin/checkzip --extensions "js,bat,btm,cmd,com,cpl,dll,exe,lnk,msi,pif,prf,reg,scr,vbs,url" --directory %s:Found banned file extensions:'(.+)'|" \
     -e 's/# (rfc1413_query_timeout) =.*/\1 = 0s/' /etc/exim4/conf.d/main/02_exim4-config_options && \
   echo "acl_smtp_dkim = acl_check_dkim" >> /etc/exim4/conf.d/main/02_exim4-config_options && \
   update-exim4.conf
@@ -57,18 +57,7 @@ RUN sed -i -r 's/(loadplugin Mail::SpamAssassin::Plugin::DKIM)/#\1/' /etc/spamas
 
 # vmail config
 
-RUN useradd -u 3000 vmail && \
-  usermod -a -G Debian-exim clamav
-
-
-# ClamAV
-
-# init signature database
-RUN freshclam
-
-# create folder for socket
-RUN mkdir /var/run/clamav && \
-  chown clamav /var/run/clamav
+RUN useradd -u 3000 vmail
 
 COPY start_exim /etc/exim4/
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
